@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="STL:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/STL_jar</output-path>
+    <root id="archive" name="STL.jar">
+      <element id="module-output" name="STL" />
+    </root>
+  </artifact>
+</component>
