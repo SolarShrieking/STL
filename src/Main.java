@@ -27,10 +27,29 @@ public class Main {
 
     //Request sent from the GUI. Handles all functionality, passing needed strings onto other methods.
     static void processAll(String twitchName) throws IOException{
-        String test = readFile("twitchList.txt", twitchName);
-        String namelist = url(twitchName, 100, 0, 0, "", null);
-        System.out.println("Namelist final text: " + namelist);
-        stringReplace(namelist, twitchName);
+        String namelist = null;
+        String twitchSubs = null;
+
+         twitchSubs = readFile("twitchList.txt", twitchName);
+            if (twitchSubs != null) {
+                stlFrame.updateLabel("Getting Twitch Subscribers...");
+                 namelist = url(twitchName, 100, 0, 0, "", null);
+                if (namelist != null) {
+                    stlFrame.updateLabel("Printing to the list...");
+                    System.out.println("Namelist final text: " + namelist);
+                    stringReplace(namelist, twitchName);
+                    stlFrame.updateLabel("");
+                    stlFrame.listCreated(twitchName);
+                }
+            } else {
+                stlFrame.updateLabel("Error! No Twitch Subs?");
+            }
+
+
+
+
+
+
 
     }
 
@@ -54,6 +73,9 @@ public class Main {
                     out.println(line);
                 }
             }
+            is.close();
+            out.close();
+            br.close();
             return sb.toString();
         } finally {
             br.close();
@@ -72,7 +94,7 @@ public class Main {
             try (FileWriter fw = new FileWriter(cwd)) {
                 if (s != null) {
                     fw.write(s);
-                }
+                } fw.close();
             }
         }
 
