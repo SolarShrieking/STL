@@ -1,6 +1,8 @@
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
+import com.mb3364.twitch.api.Twitch;
+import com.mb3364.twitch.api.auth.Scopes;
 
 import java.awt.*;
 import java.io.*;
@@ -19,6 +21,7 @@ public class Main {
     private static stlFrame stlFrame;
 
     private static String TWITCH_FOLLOWERS = "https://api.twitch.tv/kraken/channels/$values";
+    //Subscription request URL: https://api.twitch.tv/kraken/channels/userName/subscriptions
 
     public static void main(String args[]) throws Exception{
         stlFrame = new stlFrame();
@@ -104,10 +107,10 @@ public class Main {
     public static boolean authMe() {
         boolean debug = true; //TODO: Remove debugging authpass
         if (debug) { return true;}
-       // Twitch twitch = new Twitch();
-      //  twitch.setClientId("5fu22trjshv34ervh1vp1xc28ob011f"); //StellarisTwitchList client ID
+        Twitch twitch = new Twitch();
+        twitch.setClientId("5fu22trjshv34ervh1vp1xc28ob011f"); //StellarisTwitchList client ID
         URI callbackUri = URI.create("http://127.0.0.1:23522/authorize.html");
-        String authUrl = "facebook.com"; //twitch.auth().getAuthenticationUrl(twitch.getClientId(), callbackUri, Scopes.USER_READ, Scopes.CHANNEL_READ);
+        String authUrl = twitch.auth().getAuthenticationUrl(twitch.getClientId(), callbackUri, Scopes.USER_READ, Scopes.CHANNEL_READ);
         System.out.println(authUrl);
 
         if (Desktop.isDesktopSupported()) {
@@ -127,23 +130,21 @@ public class Main {
             }
         }
         //TODO: re-enable this when launching. Auth servers needed for Sub list
-        boolean authSuccess = true; // twitch.auth().awaitAccessToken();
-
-
-        authSuccess = true; //TODO: Remove Debug
+        boolean authSuccess = twitch.auth().awaitAccessToken();
 
         if (authSuccess) {
-            String accessToken = "replace"; //twitch.auth().getAccessToken();
+            String accessToken = twitch.auth().getAccessToken();
+            System.out.println("Access Token: " + accessToken);
             return true;
-            //System.out.println("Access Token: " + accessToken);
         } else {
-            //System.out.println(twitch.auth().getAuthenticationError());
+            System.out.println(twitch.auth().getAuthenticationError());
         } return false;
 
     }
 
     private static String insertURLValues(String url, String channel, int limit, int offset) {
-        return url.replace("$values", channel + "/follows/" + "?limit=" + Integer.toString(limit) + "&offset=" + Integer.toString(offset));
+        // https:
+        return url.replace("$values", channel + "/subscriptions/" + "?limit=" + Integer.toString(limit) + "&offset=" + Integer.toString(offset));
     }
 
     private static ArrayList<String> parseList(ArrayList<String> list) {

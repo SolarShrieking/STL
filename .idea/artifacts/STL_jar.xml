@@ -4,6 +4,7 @@
     <root id="archive" name="STL.jar">
       <element id="module-output" name="STL" />
       <element id="extracted-dir" path="$USER_HOME$/Desktop/minimal-json-0.9.4.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/Desktop/twitch-api-wrapper-0.3-jar-with-dependencies.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>

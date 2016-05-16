@@ -20,5 +20,6 @@
     </orderEntry>
     <orderEntry type="library" name="minimal-json-0.9.4" level="project" />
     <orderEntry type="library" name="Maven: com.eclipsesource.minimal-json:minimal-json:0.9.4" level="project" />
+    <orderEntry type="library" name="twitch-api-wrapper-0.3-jar-with-dependencies" level="project" />
   </component>
 </module>
