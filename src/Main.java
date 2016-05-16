@@ -1,7 +1,3 @@
-import com.eclipsesource.json.Json;
-import com.eclipsesource.json.JsonArray;
-import com.eclipsesource.json.JsonObject;
-
 import java.awt.*;
 import java.io.*;
 import java.net.URI;
@@ -13,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import eclipsesource.*;
 
 public class Main {
 
@@ -22,18 +19,22 @@ public class Main {
 
     public static void main(String args[]) throws Exception{
         stlFrame = new stlFrame();
+        String twitchName = "Pyrostasis";
 
-        String test = readFile("twitchList.txt");
-        String namelist = url("SolarShrieking", 100, 0, 0, "", null);
+        String test = readFile("twitchList.txt", twitchName);
+        String namelist = url(twitchName, 100, 0, 0, "", null);
         System.out.println("Namelist final text: " + namelist);
-        stringReplace(namelist);
+        stringReplace(namelist, twitchName);
     }
 
-    static String readFile(String filename) throws IOException {
+    static String readFile(String filename, String twitchName) throws IOException {
+
+        File cwdFile = new File (twitchName + ".txt");
+        String cwd = cwdFile.getAbsolutePath();
         System.out.println(filename);
         InputStream is = Main.class.getResourceAsStream(filename);
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
-        PrintStream out = new PrintStream("C:\\Users\\Michael\\IdeaProjects\\STL\\src\\copyTwitch.txt");
+        PrintStream out = new PrintStream(cwd);
         try {
             StringBuilder sb = new StringBuilder();
             String line = br.readLine();
@@ -50,11 +51,16 @@ public class Main {
         }
     }
 
-    static void stringReplace(String namelist) throws IOException {
-        for (String fn : new String[]{"C:\\Users\\Michael\\IdeaProjects\\STL\\src\\copyTwitch.txt"}) {
+    static void stringReplace(String namelist, String twitchname) throws IOException {
+
+        File cwdFile = new File (twitchname + ".txt");
+        String cwd = cwdFile.getAbsolutePath();
+        System.out.println(cwd);
+
+        for (String fn : new String[]{cwd}) {
             String s = new String(Files.readAllBytes(Paths.get(fn)));
             s = s.replace("subscriberList", namelist);
-            try (FileWriter fw = new FileWriter(fn)) {
+            try (FileWriter fw = new FileWriter(cwd)) {
                 fw.write(s);
             }
         }
@@ -144,7 +150,8 @@ public class Main {
             String inputLine = br.readLine();
             br.close();
 
-            JsonObject jsonObject = JsonObject.readFrom(inputLine);
+            JsonO jsonObject = Json.parse(inputLine).asObject();
+
             int total = Integer.parseInt(jsonObject.get("_total").toString());
 
             parsedInput = usernamesFormat(parseList(parseJSON(inputLine)));

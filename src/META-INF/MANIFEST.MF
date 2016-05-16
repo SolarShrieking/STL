@@ -1,3 +1,5 @@
 Manifest-Version: 1.0
+Sealed: true
+Class-Path: . minimal-json-0.9.4.jar
 Main-Class: Main
 
