@@ -1,3 +1,7 @@
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonObject;
+
 import java.awt.*;
 import java.io.*;
 import java.net.URI;
@@ -9,7 +13,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import eclipsesource.*;
 
 public class Main {
 
@@ -150,7 +153,7 @@ public class Main {
             String inputLine = br.readLine();
             br.close();
 
-            JsonO jsonObject = Json.parse(inputLine).asObject();
+            JsonObject jsonObject = Json.parse(inputLine).asObject();
 
             int total = Integer.parseInt(jsonObject.get("_total").toString());
 
