@@ -22,12 +22,16 @@ public class Main {
 
     public static void main(String args[]) throws Exception{
         stlFrame = new stlFrame();
-        String twitchName = "Pyrostasis";
 
+    }
+
+    //Request sent from the GUI. Handles all functionality, passing needed strings onto other methods.
+    static void processAll(String twitchName) throws IOException{
         String test = readFile("twitchList.txt", twitchName);
         String namelist = url(twitchName, 100, 0, 0, "", null);
         System.out.println("Namelist final text: " + namelist);
         stringReplace(namelist, twitchName);
+
     }
 
     static String readFile(String filename, String twitchName) throws IOException {
@@ -43,10 +47,12 @@ public class Main {
             String line = br.readLine();
 
             while (line != null) {
-                sb.append(line);
-                sb.append("\n");
-                line = br.readLine();
-                out.println(line);
+                if (line != "null") {
+                    sb.append(line);
+                    sb.append("\n");
+                    line = br.readLine();
+                    out.println(line);
+                }
             }
             return sb.toString();
         } finally {
@@ -54,7 +60,7 @@ public class Main {
         }
     }
 
-    static void stringReplace(String namelist, String twitchname) throws IOException {
+    private static void stringReplace(String namelist, String twitchname) throws IOException {
 
         File cwdFile = new File (twitchname + ".txt");
         String cwd = cwdFile.getAbsolutePath();
@@ -64,14 +70,18 @@ public class Main {
             String s = new String(Files.readAllBytes(Paths.get(fn)));
             s = s.replace("subscriberList", namelist);
             try (FileWriter fw = new FileWriter(cwd)) {
-                fw.write(s);
+                if (s != null) {
+                    fw.write(s);
+                }
             }
         }
 
 
     }
 
-    public static void authMe() {
+    public static boolean authMe() {
+        boolean debug = true; //TODO: Remove debugging authpass
+        if (debug) { return true;}
        // Twitch twitch = new Twitch();
       //  twitch.setClientId("5fu22trjshv34ervh1vp1xc28ob011f"); //StellarisTwitchList client ID
         URI callbackUri = URI.create("http://127.0.0.1:23522/authorize.html");
@@ -102,11 +112,12 @@ public class Main {
 
         if (authSuccess) {
             String accessToken = "replace"; //twitch.auth().getAccessToken();
-            System.out.println(url("SolarShrieking", 100, 0, 0, "", null));
+            return true;
             //System.out.println("Access Token: " + accessToken);
         } else {
             //System.out.println(twitch.auth().getAuthenticationError());
-        }
+        } return false;
+
     }
 
     private static String insertURLValues(String url, String channel, int limit, int offset) {
@@ -176,10 +187,11 @@ public class Main {
     }
 
 
+    @SuppressWarnings("deprecation")
     private static ArrayList<String> parseJSON(String input) {
-        JsonObject jsonObject = JsonObject.readFrom(input);
+        JsonObject jsonObject = Json.parse(input).asObject();
         JsonArray follows = Json.parse(input).asObject().get("follows").asArray();
-        ArrayList<String> followList = new ArrayList<String>();
+        ArrayList<String> followList = new  ArrayList<String>();
         for (com.eclipsesource.json.JsonValue follow : follows) {
             followList.add(follow.toString() + "\n");
         }

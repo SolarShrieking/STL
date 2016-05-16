@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,7 +18,7 @@ public class stlFrame extends JFrame {
 
     private boolean auth = false;
 
-    public stlFrame() {
+    public stlFrame() throws Exception {
         createGUI();
 
 
@@ -51,32 +52,39 @@ public class stlFrame extends JFrame {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         String username = fieldUsername.getText();
-                        if (username.isEmpty()) {
-                            labelMessage.setText("Invalid input!");
-                        } else {
                             if (validateInput(username)) {
-                                labelMessage.setText("Prepare for Authentication...");
+                                labelMessage.setText("Authenticating...");
                                 System.out.println(username);
-                                Main.authMe();
+                                if (Main.authMe()) {
+                                    try {
+                                        Main.processAll(username);
+                                    } catch (IOException ex) {
+                                        ex.printStackTrace();
+                                    }
+                                }
                             } else {
                                 labelMessage.setText("Invalid input!");
                             }
-
                         }
-
                     }
-                }
         );
         panel.add(buttonAuth);
 
-        labelMessage = new JLabel();
+
+
+        labelMessage = new JLabel("");
+        labelMessage.setPreferredSize(new Dimension(100, 15));
+        labelMessage.setVisible(true);
         panel.add(labelMessage);
+    }
+
+    public void updateLabel(String text) {
+        labelMessage.setText("ex." + text);
     }
 
     public boolean validateInput(String username) {
         //Uses regex to check if the username is valid.
         String pattern = "^[a-zA-Z0-9_]{4,25}$";
-
         for (int i = 0; i < username.length(); i++) {
             Pattern r = Pattern.compile(pattern);
             Matcher m = r.matcher(username);
