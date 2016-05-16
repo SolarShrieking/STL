@@ -3,13 +3,13 @@ import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,14 +20,56 @@ public class Main {
 
     private static String TWITCH_FOLLOWERS = "https://api.twitch.tv/kraken/channels/$values";
 
-    public static void main(String args[]) {
+    public static void main(String args[]) throws Exception{
         stlFrame = new stlFrame();
+
+        String test = readFile("twitchlist.txt");
+        String namelist = url("SolarShrieking", 100, 0, 0, "", null);
+        System.out.println("Namelist final text: " + namelist);
+        stringReplace(namelist);
+
 
 //        String followList = url("the_stargazer", 100, 0, 0, "");
 //        System.out.println(url("the_stargazer", 100, 0, 0, ""));
-//        System.out.println(url("SolarShrieking", 100, 0, 0, ""));
+//
 //        followList = parseList(followList);
 //        String formattedFollowerList = usernamesFormat(followList);
+
+
+    }
+
+    static String readFile(String filename) throws IOException {
+        System.out.println(filename);
+        InputStream is = Main.class.getResourceAsStream(filename);
+        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+        try {
+            StringBuilder sb = new StringBuilder();
+            String line = br.readLine();
+
+            while (line != null) {
+                sb.append(line);
+                sb.append("\n");
+                line = br.readLine();
+
+
+            }
+            return sb.toString();
+
+
+
+        } finally {
+            br.close();
+        }
+    }
+
+    static void stringReplace(String namelist) throws IOException {
+        for (String fn : new String[]{"C:\\Users\\Michael\\IdeaProjects\\STL\\src\\twitchList.txt"}) {
+            String s = new String(Files.readAllBytes(Paths.get(fn)));
+            s = s.replace("$dave", namelist);
+            try (FileWriter fw = new FileWriter(fn)) {
+                fw.write(s);
+            }
+        }
 
 
     }
@@ -63,7 +105,7 @@ public class Main {
 
         if (authSuccess) {
             String accessToken = "replace"; //twitch.auth().getAccessToken();
-            System.out.println(url("SolarShrieking", 100, 0, 0, ""));
+            System.out.println(url("SolarShrieking", 100, 0, 0, "", null));
             //System.out.println("Access Token: " + accessToken);
         } else {
             //System.out.println(twitch.auth().getAuthenticationError());
@@ -98,12 +140,14 @@ public class Main {
         for (String s : list) {
             listString += s + " ";
         }
+
         return listString;
     }
 
 
     //First reference should be url(username, 100, 0, 0, null)
-    public static String url(String twitchUsername, int limit, int offset, int subTotal, String parsedOutput) {
+    public static String url(String twitchUsername, int limit, int offset, int subTotal, String parsedOutput, String parsedInput) {
+
         try {
             URL url = new URL(insertURLValues(TWITCH_FOLLOWERS, twitchUsername, limit, offset));
             System.out.println(url);
@@ -115,16 +159,14 @@ public class Main {
             JsonObject jsonObject = JsonObject.readFrom(inputLine);
             int total = Integer.parseInt(jsonObject.get("_total").toString());
 
-            String parsedInput = usernamesFormat(parseList(parseJSON(inputLine)));
+            parsedInput = usernamesFormat(parseList(parseJSON(inputLine)));
             System.out.println("post-parse: " + parsedInput);
             parsedInput = parsedInput.concat(parsedOutput);
             System.out.println("post-concat: " + parsedInput);
 
             if (total > offset) {
-                System.out.println("Total: " + subTotal + "   Offset: " + offset);
-                url(twitchUsername, limit, offset + 100, total, parsedInput);
+                url(twitchUsername, limit, offset + 100, total, parsedInput, null);
             } else if (subTotal < offset) {
-                System.out.println("Total: " + subTotal + "   Offset: " + offset);
                 return parsedInput;
             }
 
@@ -132,7 +174,7 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
+        return parsedInput;
     }
 
 
