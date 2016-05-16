@@ -105,7 +105,7 @@ public class Main {
     }
 
     public static boolean authMe() {
-        boolean debug = true; //TODO: Remove debugging authpass
+        boolean debug = false;
         if (debug) { return true;}
         Twitch twitch = new Twitch();
         twitch.setClientId("5fu22trjshv34ervh1vp1xc28ob011f"); //StellarisTwitchList client ID
@@ -129,7 +129,6 @@ public class Main {
                 e.printStackTrace();
             }
         }
-        //TODO: re-enable this when launching. Auth servers needed for Sub list
         boolean authSuccess = twitch.auth().awaitAccessToken();
 
         if (authSuccess) {
