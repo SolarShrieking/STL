@@ -195,6 +195,9 @@ public class Main {
             parsedInput = parsedInput.concat(parsedOutput);
             System.out.println("post-concat: " + parsedInput);
 
+            if (offset == 1600) {
+                stlFrame.maxNames();
+            }
             if (total > offset) {
                 url(twitchUsername, limit, offset + 100, total, parsedInput, null);
             } else if (subTotal < offset) {

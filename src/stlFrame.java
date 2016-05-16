@@ -34,7 +34,7 @@ public class stlFrame extends JFrame {
 
     public stlFrame() throws Exception {
         createGUI();
-        setTitle("Stellaris Twitch Subscriber Name_list Creator");
+        setTitle("Stellaris Twitch Subscriber Namelist Creator");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
         setResizable(false);
@@ -212,5 +212,9 @@ public class stlFrame extends JFrame {
 
     public void listCreated(String username) {
         JOptionPane.showMessageDialog(null, "List Saved to " + username + ".txt");
+    }
+
+    public void maxNames() {
+        JOptionPane.showMessageDialog(null, "Sorry, TwitchAPI limits to 1600 requests.\nThe names will still be transcribed to your namelist.");
     }
 }
