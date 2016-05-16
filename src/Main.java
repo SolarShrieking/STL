@@ -23,25 +23,17 @@ public class Main {
     public static void main(String args[]) throws Exception{
         stlFrame = new stlFrame();
 
-        String test = readFile("twitchlist.txt");
+        String test = readFile("twitchList.txt");
         String namelist = url("SolarShrieking", 100, 0, 0, "", null);
         System.out.println("Namelist final text: " + namelist);
         stringReplace(namelist);
-
-
-//        String followList = url("the_stargazer", 100, 0, 0, "");
-//        System.out.println(url("the_stargazer", 100, 0, 0, ""));
-//
-//        followList = parseList(followList);
-//        String formattedFollowerList = usernamesFormat(followList);
-
-
     }
 
     static String readFile(String filename) throws IOException {
         System.out.println(filename);
         InputStream is = Main.class.getResourceAsStream(filename);
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
+        PrintStream out = new PrintStream("C:\\Users\\Michael\\IdeaProjects\\STL\\src\\copyTwitch.txt");
         try {
             StringBuilder sb = new StringBuilder();
             String line = br.readLine();
@@ -50,22 +42,18 @@ public class Main {
                 sb.append(line);
                 sb.append("\n");
                 line = br.readLine();
-
-
+                out.println(line);
             }
             return sb.toString();
-
-
-
         } finally {
             br.close();
         }
     }
 
     static void stringReplace(String namelist) throws IOException {
-        for (String fn : new String[]{"C:\\Users\\Michael\\IdeaProjects\\STL\\src\\twitchList.txt"}) {
+        for (String fn : new String[]{"C:\\Users\\Michael\\IdeaProjects\\STL\\src\\copyTwitch.txt"}) {
             String s = new String(Files.readAllBytes(Paths.get(fn)));
-            s = s.replace("$dave", namelist);
+            s = s.replace("subscriberList", namelist);
             try (FileWriter fw = new FileWriter(fn)) {
                 fw.write(s);
             }
