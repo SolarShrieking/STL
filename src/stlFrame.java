@@ -7,8 +7,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -130,21 +128,10 @@ public class stlFrame extends JFrame {
         gitImage.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (Desktop.isDesktopSupported()) {
-                    Desktop desktop = Desktop.getDesktop();
+                Main.openURLInBrowser("https://github.com/SolarShrieking/STL");
+                }
+        });
 
-                    try {
-                        desktop.browse(new URI("https://github.com/SolarShrieking/STL"));
-                    } catch (IOException | URISyntaxException ex) {
-                        ex.printStackTrace();
-                    }
-                } else {
-                    Runtime runtime = Runtime.getRuntime();
-                    try {
-                        runtime.exec("xdg-open" + "https://github.com/SolarShrieking/STL");
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }}}});
 
         try{
             gitImage.setIcon(new ImageIcon(iconGit));
@@ -160,6 +147,7 @@ public class stlFrame extends JFrame {
         donateImage.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                Main.openURLInBrowser("https://paypal.me/SolarShrieking/5");
 }});
 
         try{

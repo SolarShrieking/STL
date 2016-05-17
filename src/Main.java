@@ -52,7 +52,7 @@ public class Main {
     public static void main(String args[]) throws Exception {
         stlFrame = new stlFrame(); //Register stlFrame.java to be used.
     }
-    
+
     /**
      *
      * @param url any URL needed to be opened in a browser window.
