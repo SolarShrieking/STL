@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 public class Main {
 
     private static stlFrame stlFrame;
+    String authtoken = null;
 
     private static String TWITCH_SUBSCRIBERS = "https://api.twitch.tv/kraken/channels/$values";
     //Subscription request URL: https://api.twitch.tv/kraken/channels/userName/subscriptions
@@ -29,27 +30,14 @@ public class Main {
     }
 
     //Request sent from the GUI. Handles all functionality, passing needed strings onto other methods.
-    static void processAll(String twitchName) throws IOException {
-        String namelist = null;
-        String twitchSubs = null;
-
-        twitchSubs = readFile("twitchList.txt", twitchName);
-        if (twitchSubs != null) {
+    static void processAll(String twitchName, String namelist) throws IOException {
             stlFrame.updateLabel("Getting Twitch Subscribers...");
-            namelist = url(twitchName, 100, 0, 0, "", null);
-            if (namelist != null) {
-                stlFrame.updateLabel("Printing to the list...");
                 System.out.println("Namelist final text: " + namelist);
                 stringReplace(namelist, twitchName);
                 stlFrame.updateLabel("");
                 stlFrame.listCreated(twitchName);
             }
-        } else {
-            stlFrame.updateLabel("Error! No Twitch Subs?");
-        }
 
-
-    }
 
     static String readFile(String filename, String twitchName) throws IOException {
 
@@ -100,15 +88,15 @@ public class Main {
 
     }
 
-    public static boolean authMe() {
+    public static String authMe(String twitchName) {
         boolean debug = false;
         if (debug) {
-            return true;
+            return null;
         }
         Twitch twitch = new Twitch();
         twitch.setClientId("5fu22trjshv34ervh1vp1xc28ob011f"); //StellarisTwitchList client ID
         URI callbackUri = URI.create("http://127.0.0.1:23522/authorize.html");
-        String authUrl = twitch.auth().getAuthenticationUrl(twitch.getClientId(), callbackUri, Scopes.USER_READ, Scopes.CHANNEL_READ);
+        String authUrl = twitch.auth().getAuthenticationUrl(twitch.getClientId(), callbackUri, Scopes.CHANNEL_SUBSCRIPTIONS);
         System.out.println(authUrl);
 
         if (Desktop.isDesktopSupported()) {
@@ -132,17 +120,27 @@ public class Main {
         if (authSuccess) {
             String accessToken = twitch.auth().getAccessToken();
             System.out.println("Access Token: " + accessToken);
-            return true;
+            String namelist = url(twitchName, 100, 0, 0, "", null, accessToken);
+            if (namelist != null) {
+                stlFrame.updateLabel("Namelist Request Success!");
+                return namelist;
+            }
         } else {
+            stlFrame.updateLabel("Authentication Error!");
             System.out.println(twitch.auth().getAuthenticationError());
         }
-        return false;
+        return null;
 
     }
 
-    private static String insertURLValues(String url, String channel, int limit, int offset) {
+    public static String authToken(String token) {
+        String authtoken = token;
+                return token;
+    }
+
+    private static String insertURLValues(String url, String channel, int limit, int offset, String token) {
         // https:
-        return url.replace("$values", channel + "/subscriptions/" + "?limit=" + Integer.toString(limit) + "&offset=" + Integer.toString(offset));
+        return url.replace("$values", channel + "/subscriptions/" + "?oauth_token=" + token + "?limit=" + Integer.toString(limit) + "&offset=" + Integer.toString(offset));
     }
 
     private static ArrayList<String> parseList(ArrayList<String> list) {
@@ -175,11 +173,13 @@ public class Main {
 
 
     //First reference should be url(username, 100, 0, 0, null)
-    public static String url(String twitchUsername, int limit, int offset, int subTotal, String parsedOutput, String parsedInput) {
+    public static String url(String twitchUsername, int limit, int offset, int subTotal, String parsedOutput, String parsedInput, String authtoken) {
+
 
         try {
-            URL url = new URL(insertURLValues(TWITCH_SUBSCRIBERS, twitchUsername, limit, offset));
+            URL url = new URL(insertURLValues(TWITCH_SUBSCRIBERS, twitchUsername, limit, offset, authtoken));
             System.out.println(url);
+            stlFrame.updateLabel("Generating URL, Requesting");
             URLConnection connection = url.openConnection();
             BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             String inputLine = br.readLine();
@@ -188,6 +188,7 @@ public class Main {
             JsonObject jsonObject = Json.parse(inputLine).asObject();
 
             int total = Integer.parseInt(jsonObject.get("_total").toString());
+            stlFrame.updateLabel("Total Subs" + total);
 
             parsedInput = usernamesFormat(parseList(parseJSON(inputLine)));
             System.out.println("post-parse: " + parsedInput);
@@ -198,7 +199,7 @@ public class Main {
                 stlFrame.maxNames();
             }
             if (total > offset) {
-                url(twitchUsername, limit, offset + 100, total, parsedInput, null);
+                url(twitchUsername, limit, offset + 100, total, parsedInput, null, authtoken);
             } else if (subTotal < offset) {
                 return parsedInput;
             }

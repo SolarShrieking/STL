@@ -1,7 +1,10 @@
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URI;
@@ -101,12 +104,12 @@ public class stlFrame extends JFrame {
                             if (validateInput(username)) {
                                 labelMessage.setText("Authenticating...");
                                 System.out.println(username);
-                                if (Main.authMe()) {
-                                    try {
-                                        Main.processAll(username);
-                                    } catch (IOException ex) {
-                                        ex.printStackTrace();
-                                    }
+
+                                try{
+                                    String namelist = Main.authMe(username);
+                                    Main.processAll(username, namelist);
+                                } catch (IOException ex) {
+                                    ex.printStackTrace();
                                 }
                             } else {
                                 labelMessage.setText("Invalid input!");
