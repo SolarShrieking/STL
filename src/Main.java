@@ -18,14 +18,90 @@ import java.util.regex.Pattern;
 
 public class Main {
 
+    /**
+     *      Plan:
+     *
+     *      stlFrame   {
+     *      - User Types Name
+     *      - User Press Authenticate Button
+     *      - Button sends User to Auth Page
+     *      - User Authorizes, Then Presses brand new convert button. }
+     *
+     *      - Program grabs all subs and stores in a string, formatted properly
+     *      - Copies default twitchList, naming to username inputted
+     *      - Replaces placeholder in twitchList copy with namelist
+     *      - Eat Cake
+     *
+     */
+
+
+
+    /**
+     *
+     */
+
     private static stlFrame stlFrame;
     String authtoken = null;
 
-    private static String TWITCH_SUBSCRIBERS = "https://api.twitch.tv/kraken/channels/$values";
     //Subscription request URL: https://api.twitch.tv/kraken/channels/userName/subscriptions
+    private static String TWITCH_SUBSCRIBERS = "https://api.twitch.tv/kraken/channels/$values";
+
 
     public static void main(String args[]) throws Exception {
         stlFrame = new stlFrame();
+        /**
+         * stlFrame Passes username to grabbing list method
+         */
+        
+
+
+
+
+    }
+
+
+    public static String authMe(String twitchName) {
+        boolean debug = false;
+        if (debug) {
+            return null;
+        }
+        Twitch twitch = new Twitch();
+        twitch.setClientId("5fu22trjshv34ervh1vp1xc28ob011f"); //StellarisTwitchList client ID
+        URI callbackUri = URI.create("http://127.0.0.1:23522/authorize.html");
+        String authUrl = twitch.auth().getAuthenticationUrl(twitch.getClientId(), callbackUri, Scopes.CHANNEL_SUBSCRIPTIONS);
+        System.out.println(authUrl);
+
+        if (Desktop.isDesktopSupported()) {
+            Desktop desktop = Desktop.getDesktop();
+
+            try {
+                desktop.browse(new URI(authUrl));
+            } catch (IOException | URISyntaxException e) {
+                e.printStackTrace();
+            }
+        } else {
+            Runtime runtime = Runtime.getRuntime();
+            try {
+                runtime.exec("xdg-open " + authUrl);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        boolean authSuccess = twitch.auth().awaitAccessToken();
+
+        if (authSuccess) {
+            String accessToken = twitch.auth().getAccessToken();
+            System.out.println("Access Token: " + accessToken);
+            String namelist = url(twitchName, 100, 0, 0, "", null, accessToken);
+            if (namelist != null) {
+                stlFrame.updateLabel("Namelist Request Success!");
+                return namelist;
+            }
+        } else {
+            stlFrame.updateLabel("Authentication Error!");
+            System.out.println(twitch.auth().getAuthenticationError());
+        }
+        return null;
 
     }
 
@@ -88,50 +164,6 @@ public class Main {
 
     }
 
-    public static String authMe(String twitchName) {
-        boolean debug = false;
-        if (debug) {
-            return null;
-        }
-        Twitch twitch = new Twitch();
-        twitch.setClientId("5fu22trjshv34ervh1vp1xc28ob011f"); //StellarisTwitchList client ID
-        URI callbackUri = URI.create("http://127.0.0.1:23522/authorize.html");
-        String authUrl = twitch.auth().getAuthenticationUrl(twitch.getClientId(), callbackUri, Scopes.CHANNEL_SUBSCRIPTIONS);
-        System.out.println(authUrl);
-
-        if (Desktop.isDesktopSupported()) {
-            Desktop desktop = Desktop.getDesktop();
-
-            try {
-                desktop.browse(new URI(authUrl));
-            } catch (IOException | URISyntaxException e) {
-                e.printStackTrace();
-            }
-        } else {
-            Runtime runtime = Runtime.getRuntime();
-            try {
-                runtime.exec("xdg-open " + authUrl);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        boolean authSuccess = twitch.auth().awaitAccessToken();
-
-        if (authSuccess) {
-            String accessToken = twitch.auth().getAccessToken();
-            System.out.println("Access Token: " + accessToken);
-            String namelist = url(twitchName, 100, 0, 0, "", null, accessToken);
-            if (namelist != null) {
-                stlFrame.updateLabel("Namelist Request Success!");
-                return namelist;
-            }
-        } else {
-            stlFrame.updateLabel("Authentication Error!");
-            System.out.println(twitch.auth().getAuthenticationError());
-        }
-        return null;
-
-    }
 
     public static String authToken(String token) {
         String authtoken = token;
