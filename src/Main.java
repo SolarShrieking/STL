@@ -16,77 +16,73 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ *      Plan:
+ *
+ *      stlFrame   {
+ *      - User Types Name
+ *      - User Press Authenticate Button
+ *      - Button sends User to Auth Page
+ *      - User Authorizes, Then Presses brand new convert button. }
+ *
+ *      - Program grabs all subs and stores in a string, formatted properly
+ *      - Copies default twitchList, naming to username inputted
+ *      - Replaces placeholder in twitchList copy with namelist
+ *      - Eat Cake
+ *
+ *
+ *      get Authentication
+ *      piece together URL
+ *      Request
+ *      Get Return JSON, parse out needed info
+ *      Format
+ *      Place in List
+ *
+ *
+ */
 public class Main {
 
-    /**
-     *      Plan:
-     *
-     *      stlFrame   {
-     *      - User Types Name
-     *      - User Press Authenticate Button
-     *      - Button sends User to Auth Page
-     *      - User Authorizes, Then Presses brand new convert button. }
-     *
-     *      - Program grabs all subs and stores in a string, formatted properly
-     *      - Copies default twitchList, naming to username inputted
-     *      - Replaces placeholder in twitchList copy with namelist
-     *      - Eat Cake
-     *
-     */
-
-
-
-    /**
-     *
-     */
-
+    private static boolean debug = true;
     private static stlFrame stlFrame;
-    String authtoken = null;
-
-    //Subscription request URL: https://api.twitch.tv/kraken/channels/userName/subscriptions
-    private static String TWITCH_SUBSCRIBERS = "https://api.twitch.tv/kraken/channels/$values";
+    private static String TWITCH_SUBSCRIBERS = "https://api.twitch.tv/kraken/channels/$values"; // Base of the Subscribers Request URL https://api.twitch.tv/kraken/channels/channel_name/subscriptions
+    private static String TWITCH_FOLLOWERS = "https://api.twitch.tv/kraken/channels/$values"; // Base of the Subscribers Request URL https://api.twitch.tv/kraken/channels/channel_name/follows
+    String authToken = null; // Authentication token of the user
 
 
     public static void main(String args[]) throws Exception {
-        stlFrame = new stlFrame();
-        /**
-         * stlFrame Passes username to grabbing list method
-         */
-        
-
-
-
-
+        stlFrame = new stlFrame(); //Register stlFrame.java to be used.
     }
-
-
-    public static String authMe(String twitchName) {
-        boolean debug = false;
-        if (debug) {
-            return null;
-        }
-        Twitch twitch = new Twitch();
-        twitch.setClientId("5fu22trjshv34ervh1vp1xc28ob011f"); //StellarisTwitchList client ID
-        URI callbackUri = URI.create("http://127.0.0.1:23522/authorize.html");
-        String authUrl = twitch.auth().getAuthenticationUrl(twitch.getClientId(), callbackUri, Scopes.CHANNEL_SUBSCRIPTIONS);
-        System.out.println(authUrl);
-
+    
+    /**
+     *
+     * @param url any URL needed to be opened in a browser window.
+     */
+    public static void openURLInBrowser(String url) {
         if (Desktop.isDesktopSupported()) {
             Desktop desktop = Desktop.getDesktop();
-
             try {
-                desktop.browse(new URI(authUrl));
+                desktop.browse(new URI(url));
             } catch (IOException | URISyntaxException e) {
                 e.printStackTrace();
             }
         } else {
             Runtime runtime = Runtime.getRuntime();
             try {
-                runtime.exec("xdg-open " + authUrl);
+                runtime.exec("xdg-open " + url);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+
+    public static String authMe(String twitchName) {
+        Twitch twitch = new Twitch(); //getting twitch as Twitch from TwitchAPI Wrapper
+        twitch.setClientId("5fu22trjshv34ervh1vp1xc28ob011f"); //StellarisTwitchList Client ID
+        URI callbackUri = URI.create("http://127.0.0.1:23522/authorize.html"); //Authentication URL
+        String authUrl = twitch.auth().getAuthenticationUrl(twitch.getClientId(), callbackUri, Scopes.CHANNEL_SUBSCRIPTIONS); //Gets Authorization Request with permission to view channel subs
+        if(debug) {System.out.println(authUrl);}
+        openURLInBrowser(authUrl);
         boolean authSuccess = twitch.auth().awaitAccessToken();
 
         if (authSuccess) {
