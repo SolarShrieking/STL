@@ -211,8 +211,8 @@ public class Main {
             BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             String inputLine = br.readLine();
             br.close();
-
             JsonObject jsonObject = Json.parse(inputLine).asObject();
+            //TODO: catch error if user doesn't have Subscription features.
 
             int total = Integer.parseInt(jsonObject.get("_total").toString());
             stlFrame.updateLabel("Total Subs" + total);
@@ -234,6 +234,7 @@ public class Main {
 
         } catch (IOException e) {
             e.printStackTrace();
+            stlFrame.popupWindow("Error -- Do you not have any subscribers?");
         }
         return parsedInput;
     }

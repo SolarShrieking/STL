@@ -208,4 +208,8 @@ public class stlFrame extends JFrame {
     public void maxNames() {
         JOptionPane.showMessageDialog(null, "Sorry, TwitchAPI limits to 1600 requests.\nThe names will still be transcribed to your namelist.");
     }
+
+    public void popupWindow(String message) {
+        JOptionPane.showMessageDialog(null, message);
+    }
 }
