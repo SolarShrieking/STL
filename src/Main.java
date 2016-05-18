@@ -45,7 +45,7 @@ public class Main {
     private static stlFrame stlFrame;
     private static String TWITCH_SUBSCRIBERS = "https://api.twitch.tv/kraken/channels/$values"; // Base of the Subscribers Request URL https://api.twitch.tv/kraken/channels/channel_name/subscriptions
     private static String TWITCH_FOLLOWERS = "https://api.twitch.tv/kraken/channels/$values"; // Base of the Subscribers Request URL https://api.twitch.tv/kraken/channels/channel_name/follows
-    static String authToken = null; // Authentication token of the user
+    private static String authToken = null; // Authentication token of the user
     private String twitchListLocation = null;
 
 
@@ -56,7 +56,7 @@ public class Main {
     /**
      * @param url   any URL needed to be opened in a browser window.
      */
-    public static void openURLInBrowser(String url) {
+     static void openURLInBrowser(String url) {
         if (Desktop.isDesktopSupported()) {
             Desktop desktop = Desktop.getDesktop();
             try {
@@ -298,12 +298,12 @@ public class Main {
 
         } catch (IOException e) {
             e.printStackTrace();
-            Writer writer = new StringWriter();
-            PrintWriter printWriter = new PrintWriter(writer);
-            e.printStackTrace(printWriter);
-            String s = writer.toString();
-            stlFrame.updateLabel("Error!");
-            stlFrame.popupWindow("Error -- Do you not have any subscribers?" + "\n" + s);
+//            Writer writer = new StringWriter();
+//            PrintWriter printWriter = new PrintWriter(writer);
+//            e.printStackTrace(printWriter);
+//            String s = writer.toString();
+//            stlFrame.updateLabel("Error!");
+            stlFrame.popupWindow("Error -- Do you not have any subscribers?" /**+ "\n"+ s*/); // debug stacktrace popup removed.
             return null;
         }
         return parsedInput;
