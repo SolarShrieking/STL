@@ -1,10 +1,6 @@
 # Stellaris <- Twitch -> List
 
-Transcribe your Twitch Subscribers into a Stellaris namelist file for endless fun!
-
-**more documentation coming soon
-
-**things are ~~probably~~ broken right now
+Transcribe your Twitch Subscribers/Followers into a Stellaris namelist file for endless fun!
 
 #Download
 You can download the jarfile [here](https://www.dropbox.com/s/3pzisl58a2t1489/STL.jar?dl=1) 
