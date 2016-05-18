@@ -46,7 +46,7 @@ public class Main {
     private static stlFrame stlFrame;
     private static String TWITCH_SUBSCRIBERS = "https://api.twitch.tv/kraken/channels/$values"; // Base of the Subscribers Request URL https://api.twitch.tv/kraken/channels/channel_name/subscriptions
     private static String TWITCH_FOLLOWERS = "https://api.twitch.tv/kraken/channels/$values"; // Base of the Subscribers Request URL https://api.twitch.tv/kraken/channels/channel_name/follows
-    String authToken = null; // Authentication token of the user
+    static String authToken = null; // Authentication token of the user
     private String twitchListLocation = null;
 
 
@@ -87,8 +87,8 @@ public class Main {
         boolean authSuccess = twitch.auth().awaitAccessToken();
 
         if (authSuccess) {
-            String accessToken = twitch.auth().getAccessToken();
-            System.out.println("Access Token: " + accessToken);
+            authToken = twitch.auth().getAccessToken();
+            System.out.println("Access Token: " + authToken);
             return true;
             }
          else {
@@ -98,6 +98,10 @@ public class Main {
         return null;
 
     }
+
+//    public static String authToken(String auth) {
+//        authToken = auth;
+//    }
 
     //Request sent from the GUI. Handles all functionality, passing needed strings onto other methods.
     static void processAll(String twitchName) throws IOException {
@@ -183,10 +187,13 @@ public class Main {
     }
 
     private static String insertURLValues(String url, String channel, int limit, int offset) {
+        Twitch twitch = new Twitch();
+
+        // https://api.twitch.tv/kraken/channels/SolarShrieking/subscriptions?limit=100&offset=0&oauth_token=tc7111mgvyxbtk777ucmw726ztb23k&scope=channel_subscriptions
         if (stlFrame.useFollows) {
-            return url.replace("$values", channel + "/follows" /**+ "?oauth_token=" + token*/ + "?limit=" + Integer.toString(limit) + "&offset=" + Integer.toString(offset));
+            return url.replace("$values", channel + "/follows" /**+ "?oauth_token=" + token*/ + "?limit=" + Integer.toString(limit) + "&offset=" + Integer.toString(offset) + "&oauth_token=" + authToken);
         }
-        return url.replace("$values", channel + "/subscriptions" /**+ "?oauth_token=" + token*/ + "?limit=" + Integer.toString(limit) + "&offset=" + Integer.toString(offset));
+        return url.replace("$values", channel + "/subscriptions" /***/ + "?limit=" + Integer.toString(limit) + "&offset=" + Integer.toString(offset)+ "&oauth_token=" + authToken);
     }
 
     private static ArrayList<String> parseList(ArrayList<String> list) {
@@ -220,8 +227,6 @@ public class Main {
 
     //First reference should be url(username, 100, 0, 0, null)
     public static String url(String twitchUsername, int limit, int offset, int subTotal, String parsedOutput, String parsedInput) {
-
-
         try {
             URL url = new URL(insertURLValues(TWITCH_SUBSCRIBERS, twitchUsername, limit, offset));
             System.out.println(url);
@@ -252,7 +257,6 @@ public class Main {
             } else if (subTotal < offset) {
                 return parsedInput;
             }
-
 
         } catch (IOException e) {
             e.printStackTrace();
