@@ -166,9 +166,8 @@ public class Main {
                 return token;
     }
 
-    private static String insertURLValues(String url, String channel, int limit, int offset, String token) {
-        // https:
-        return url.replace("$values", channel + "/subscriptions/" + "?oauth_token=" + token + "?limit=" + Integer.toString(limit) + "&offset=" + Integer.toString(offset));
+    private static String insertURLValues(String url, String channel, int limit, int offset) {
+        return url.replace("$values", channel + "/follows/" /**+ "?oauth_token=" + token*/ + "?limit=" + Integer.toString(limit) + "&offset=" + Integer.toString(offset));
     }
 
     private static ArrayList<String> parseList(ArrayList<String> list) {
@@ -205,7 +204,7 @@ public class Main {
 
 
         try {
-            URL url = new URL(insertURLValues(TWITCH_SUBSCRIBERS, twitchUsername, limit, offset, authtoken));
+            URL url = new URL(insertURLValues(TWITCH_FOLLOWERS, twitchUsername, limit, offset));
             System.out.println(url);
             stlFrame.updateLabel("Generating URL, Requesting");
             URLConnection connection = url.openConnection();
@@ -243,7 +242,8 @@ public class Main {
     @SuppressWarnings("deprecation")
     private static ArrayList<String> parseJSON(String input) {
         JsonObject jsonObject = Json.parse(input).asObject();
-        JsonArray subs = Json.parse(input).asObject().get("subscriptions").asArray();
+        JsonArray subs = Json.parse(input).asObject().get("follows").asArray();
+//        JsonArray subs = Json.parse(input).asObject().get("subscriptions").asArray();
         ArrayList<String> subList = new ArrayList<>();
         for (com.eclipsesource.json.JsonValue sub : subs) {
             subList.add(sub.toString() + "\n");
