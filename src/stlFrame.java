@@ -1,10 +1,7 @@
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
@@ -22,6 +19,9 @@ public class stlFrame extends JFrame {
     private JLabel labelMessage;
     private JLabel logoImage;
     private JButton donateButton;
+    private JCheckBox useFollowers;
+
+    public boolean useFollows = false;
 
     private boolean auth = false;
     private final Class<?> referenceClass = Main.class;
@@ -91,6 +91,18 @@ public class stlFrame extends JFrame {
         fieldUsername = new JTextField();
         fieldUsername.setColumns(20);
 
+        useFollowers = new JCheckBox("Use Followers instead?");
+        useFollowers.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if(e.getStateChange() == ItemEvent.SELECTED) {
+                    useFollows = true;
+                } else{
+                    useFollows = false;
+                }
+            }
+        });
+
 
         //Authentication button. Sends user to twitch auth page
         buttonAuth = new JButton("Authenticate");
@@ -102,9 +114,10 @@ public class stlFrame extends JFrame {
                             if (validateInput(username)) {
                                 labelMessage.setText("Authenticating...");
                                 System.out.println(username);
-
-
                                 try{
+                                    if (useFollows) {
+                                        System.out.println("using followers instead");
+                                    }
                                 Main.processAll(username);
                                 } catch (IOException ex) {
                                     System.out.println("Error in stlFrame!");
@@ -171,11 +184,11 @@ public class stlFrame extends JFrame {
         centerPanel.add(buttonAuth);
 
 
-
         centerPanel.add(labelMessage);
 
         bottomPanel.add(donateImage);
         bottomPanel.add(gitImage, FlowLayout.LEFT);
+        bottomPanel.add(useFollowers);
 
         add(topPanel, BorderLayout.NORTH);
         add(centerPanel, BorderLayout.CENTER);

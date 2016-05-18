@@ -180,6 +180,9 @@ public class Main {
     }
 
     private static String insertURLValues(String url, String channel, int limit, int offset) {
+        if (stlFrame.useFollows) {
+            return url.replace("$values", channel + "/follows" /**+ "?oauth_token=" + token*/ + "?limit=" + Integer.toString(limit) + "&offset=" + Integer.toString(offset));
+        }
         return url.replace("$values", channel + "/subscriptions" /**+ "?oauth_token=" + token*/ + "?limit=" + Integer.toString(limit) + "&offset=" + Integer.toString(offset));
     }
 
@@ -261,8 +264,12 @@ public class Main {
     @SuppressWarnings("deprecation")
     private static ArrayList<String> parseJSON(String input) {
         JsonObject jsonObject = Json.parse(input).asObject();
-//        JsonArray subs = Json.parse(input).asObject().get("follows").asArray();
-        JsonArray subs = Json.parse(input).asObject().get("subscriptions").asArray();
+        JsonArray subs;
+        if ( stlFrame.useFollows) {
+             subs = Json.parse(input).asObject().get("follows").asArray();
+        } else {
+             subs = Json.parse(input).asObject().get("subscriptions").asArray();
+        }
         ArrayList<String> subList = new ArrayList<>();
         for (com.eclipsesource.json.JsonValue sub : subs) {
             subList.add(sub.toString() + "\n");
