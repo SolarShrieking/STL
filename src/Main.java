@@ -88,7 +88,7 @@ public class Main {
         if (authSuccess) {
             String accessToken = twitch.auth().getAccessToken();
             System.out.println("Access Token: " + accessToken);
-            String namelist = url(twitchName, 100, 0, 0, "", null, accessToken);
+            String namelist = url(twitchName, 100, 0, 0, "", null);
             if (namelist != null) {
                 stlFrame.updateLabel("Namelist Request Success!");
                 return namelist;
@@ -167,7 +167,7 @@ public class Main {
     }
 
     private static String insertURLValues(String url, String channel, int limit, int offset) {
-        return url.replace("$values", channel + "/follows/" /**+ "?oauth_token=" + token*/ + "?limit=" + Integer.toString(limit) + "&offset=" + Integer.toString(offset));
+        return url.replace("$values", channel + "/subscriptions" /**+ "?oauth_token=" + token*/ + "?limit=" + Integer.toString(limit) + "&offset=" + Integer.toString(offset));
     }
 
     private static ArrayList<String> parseList(ArrayList<String> list) {
@@ -200,11 +200,11 @@ public class Main {
 
 
     //First reference should be url(username, 100, 0, 0, null)
-    public static String url(String twitchUsername, int limit, int offset, int subTotal, String parsedOutput, String parsedInput, String authtoken) {
+    public static String url(String twitchUsername, int limit, int offset, int subTotal, String parsedOutput, String parsedInput) {
 
 
         try {
-            URL url = new URL(insertURLValues(TWITCH_FOLLOWERS, twitchUsername, limit, offset));
+            URL url = new URL(insertURLValues(TWITCH_SUBSCRIBERS, twitchUsername, limit, offset));
             System.out.println(url);
             stlFrame.updateLabel("Generating URL, Requesting");
             URLConnection connection = url.openConnection();
@@ -226,7 +226,7 @@ public class Main {
                 stlFrame.maxNames();
             }
             if (total > offset) {
-                url(twitchUsername, limit, offset + 100, total, parsedInput, null, authtoken);
+                url(twitchUsername, limit, offset + 100, total, parsedInput, null);
             } else if (subTotal < offset) {
                 return parsedInput;
             }
