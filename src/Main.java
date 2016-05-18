@@ -76,7 +76,7 @@ public class Main {
     }
 
 
-    public static String authMe(String twitchName) {
+    public static Boolean authMe(String twitchName) {
         Twitch twitch = new Twitch(); //getting twitch as Twitch from TwitchAPI Wrapper
         twitch.setClientId("5fu22trjshv34ervh1vp1xc28ob011f"); //StellarisTwitchList Client ID
         URI callbackUri = URI.create("http://127.0.0.1:23522/authorize.html"); //Authentication URL
@@ -88,12 +88,9 @@ public class Main {
         if (authSuccess) {
             String accessToken = twitch.auth().getAccessToken();
             System.out.println("Access Token: " + accessToken);
-            String namelist = url(twitchName, 100, 0, 0, "", null);
-            if (namelist != null) {
-                stlFrame.updateLabel("Namelist Request Success!");
-                return namelist;
+            return true;
             }
-        } else {
+         else {
             stlFrame.updateLabel("Authentication Error!");
             System.out.println(twitch.auth().getAuthenticationError());
         }
@@ -102,12 +99,28 @@ public class Main {
     }
 
     //Request sent from the GUI. Handles all functionality, passing needed strings onto other methods.
-    static void processAll(String twitchName, String namelist) throws IOException {
-            stlFrame.updateLabel("Getting Twitch Subscribers...");
+    static void processAll(String twitchName) throws IOException {
+        try{
+            boolean authorized = authMe(twitchName);
+            System.out.println("Authorization Status: " + authorized);
+
+            if (authorized) {
+                String namelist = url(twitchName, 100, 0, 0, "", null);
+                System.out.println("Namelist: " + namelist);
+                stlFrame.updateLabel("Getting Twitch Subscribers...");
                 System.out.println("Namelist final text: " + namelist);
                 stringReplace(namelist, twitchName);
-                stlFrame.updateLabel("");
                 stlFrame.listCreated(twitchName);
+            }
+
+//            if (namelist != null) {
+//                stlFrame.updateLabel("Namelist Request Success!");
+//                return namelist;
+
+        } catch (IOException e){
+            System.out.println("Error in processAll");
+        }
+
             }
 
 
@@ -207,13 +220,16 @@ public class Main {
             URL url = new URL(insertURLValues(TWITCH_SUBSCRIBERS, twitchUsername, limit, offset));
             System.out.println(url);
             stlFrame.updateLabel("Generating URL, Requesting");
+
             URLConnection connection = url.openConnection();
             BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             String inputLine = br.readLine();
             br.close();
             JsonObject jsonObject = Json.parse(inputLine).asObject();
-            //TODO: catch error if user doesn't have Subscription features.
 
+            //TODO: catch error if user doesn't have Subscription features.
+//            String test = jsonObject.get("error").asObject().toString();
+//            System.out.println(test);
             int total = Integer.parseInt(jsonObject.get("_total").toString());
             stlFrame.updateLabel("Total Subs" + total);
 
@@ -234,7 +250,9 @@ public class Main {
 
         } catch (IOException e) {
             e.printStackTrace();
+            stlFrame.updateLabel("Error!");
             stlFrame.popupWindow("Error -- Do you not have any subscribers?");
+            return null;
         }
         return parsedInput;
     }
@@ -243,8 +261,8 @@ public class Main {
     @SuppressWarnings("deprecation")
     private static ArrayList<String> parseJSON(String input) {
         JsonObject jsonObject = Json.parse(input).asObject();
-        JsonArray subs = Json.parse(input).asObject().get("follows").asArray();
-//        JsonArray subs = Json.parse(input).asObject().get("subscriptions").asArray();
+//        JsonArray subs = Json.parse(input).asObject().get("follows").asArray();
+        JsonArray subs = Json.parse(input).asObject().get("subscriptions").asArray();
         ArrayList<String> subList = new ArrayList<>();
         for (com.eclipsesource.json.JsonValue sub : subs) {
             subList.add(sub.toString() + "\n");

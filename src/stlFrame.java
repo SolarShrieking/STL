@@ -103,11 +103,11 @@ public class stlFrame extends JFrame {
                                 labelMessage.setText("Authenticating...");
                                 System.out.println(username);
 
+
                                 try{
-                                    String namelist = Main.authMe(username);
-                                    Main.processAll(username, namelist);
+                                Main.processAll(username);
                                 } catch (IOException ex) {
-                                    ex.printStackTrace();
+                                    System.out.println("Error in stlFrame!");
                                 }
                             } else {
                                 labelMessage.setText("Invalid input!");
@@ -119,7 +119,7 @@ public class stlFrame extends JFrame {
 
 
         labelMessage = new JLabel("");
-        labelMessage.setPreferredSize(new Dimension(100, 15));
+        labelMessage.setPreferredSize(new Dimension(200, 15));
         labelMessage.setVisible(true);
 
         JLabel gitImage = new JLabel();
