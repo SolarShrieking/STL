@@ -47,6 +47,7 @@ public class Main {
     private static String TWITCH_SUBSCRIBERS = "https://api.twitch.tv/kraken/channels/$values"; // Base of the Subscribers Request URL https://api.twitch.tv/kraken/channels/channel_name/subscriptions
     private static String TWITCH_FOLLOWERS = "https://api.twitch.tv/kraken/channels/$values"; // Base of the Subscribers Request URL https://api.twitch.tv/kraken/channels/channel_name/follows
     String authToken = null; // Authentication token of the user
+    private String twitchListLocation = null;
 
 
     public static void main(String args[]) throws Exception {
@@ -108,6 +109,7 @@ public class Main {
                 String namelist = url(twitchName, 100, 0, 0, "", null);
                 System.out.println("Namelist: " + namelist);
                 stlFrame.updateLabel("Getting Twitch Subscribers...");
+                readFile("twitchList.txt", twitchName);
                 System.out.println("Namelist final text: " + namelist);
                 stringReplace(namelist, twitchName);
                 stlFrame.listCreated(twitchName);
@@ -118,6 +120,7 @@ public class Main {
 //                return namelist;
 
         } catch (IOException e){
+            e.printStackTrace();
             System.out.println("Error in processAll");
         }
 
