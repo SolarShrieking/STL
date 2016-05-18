@@ -256,8 +256,12 @@ public class Main {
 
         } catch (IOException e) {
             e.printStackTrace();
+            Writer writer = new StringWriter();
+            PrintWriter printWriter = new PrintWriter(writer);
+            e.printStackTrace(printWriter);
+            String s = writer.toString();
             stlFrame.updateLabel("Error!");
-            stlFrame.popupWindow("Error -- Do you not have any subscribers?");
+            stlFrame.popupWindow("Error -- Do you not have any subscribers?" + "\n" + s);
             return null;
         }
         return parsedInput;
