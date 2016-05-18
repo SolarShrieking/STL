@@ -17,29 +17,28 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- *      Plan:
- *
- *      stlFrame   {
- *      - User Types Name
- *      - User Press Authenticate Button
- *      - Button sends User to Auth Page
- *      - User Authorizes, Then Presses brand new convert button. }
- *
- *      - Program grabs all subs and stores in a string, formatted properly
- *      - Copies default twitchList, naming to username inputted
- *      - Replaces placeholder in twitchList copy with namelist
- *      - Eat Cake
- *
- *
- *      get Authentication
- *      piece together URL
- *      Request
- *      Get Return JSON, parse out needed info
- *      Format
- *      Place in List
- *
- *
+ * Plan:
+ * <p>
+ * stlFrame   {
+ * - User Types Name
+ * - User Press Authenticate Button
+ * - Button sends User to Auth Page
+ * - User Authorizes, Then Presses brand new convert button. }
+ * <p>
+ * - Program grabs all subs and stores in a string, formatted properly
+ * - Copies default twitchList, naming to username inputted
+ * - Replaces placeholder in twitchList copy with namelist
+ * - Eat Cake
+ * <p>
+ * <p>
+ * get Authentication
+ * piece together URL
+ * Request
+ * Get Return JSON, parse out needed info
+ * Format
+ * Place in List
  */
+
 public class Main {
 
     private static boolean debug = true;
@@ -55,8 +54,7 @@ public class Main {
     }
 
     /**
-     *
-     * @param url any URL needed to be opened in a browser window.
+     * @param url   any URL needed to be opened in a browser window.
      */
     public static void openURLInBrowser(String url) {
         if (Desktop.isDesktopSupported()) {
@@ -76,13 +74,19 @@ public class Main {
         }
     }
 
-
+    /**
+     *
+     * @param twitchName    The user's Twitch username
+     * @return              True/False Authorized
+     */
     public static Boolean authMe(String twitchName) {
         Twitch twitch = new Twitch(); //getting twitch as Twitch from TwitchAPI Wrapper
         twitch.setClientId("5fu22trjshv34ervh1vp1xc28ob011f"); //StellarisTwitchList Client ID
         URI callbackUri = URI.create("http://127.0.0.1:23522/authorize.html"); //Authentication URL
         String authUrl = twitch.auth().getAuthenticationUrl(twitch.getClientId(), callbackUri, Scopes.CHANNEL_SUBSCRIPTIONS); //Gets Authorization Request with permission to view channel subs
-        if(debug) {System.out.println(authUrl);}
+        if (debug) {
+            System.out.println(authUrl);
+        }
         openURLInBrowser(authUrl);
         boolean authSuccess = twitch.auth().awaitAccessToken();
 
@@ -90,8 +94,7 @@ public class Main {
             authToken = twitch.auth().getAccessToken();
             System.out.println("Access Token: " + authToken);
             return true;
-            }
-         else {
+        } else {
             stlFrame.updateLabel("Authentication Error!");
             System.out.println(twitch.auth().getAuthenticationError());
         }
@@ -104,8 +107,14 @@ public class Main {
 //    }
 
     //Request sent from the GUI. Handles all functionality, passing needed strings onto other methods.
-    static void processAll(String twitchName) throws IOException {
-        try{
+
+
+    /**
+     *
+     * @param twitchName    The user's Twitch username
+     */
+    static void processAll(String twitchName) {
+        try {
             boolean authorized = authMe(twitchName);
             System.out.println("Authorization Status: " + authorized);
 
@@ -123,14 +132,20 @@ public class Main {
 //                stlFrame.updateLabel("Namelist Request Success!");
 //                return namelist;
 
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Error in processAll");
         }
 
-            }
+    }
 
-
+    /**
+     *
+     * @param filename =    Name of twitchList.txt file, TODO: Make part of readFile() itself
+     * @param twitchName =  The user's Twitch username
+     * @return
+     * @throws IOException
+     */
     static String readFile(String filename, String twitchName) throws IOException {
 
         File cwdFile = new File(twitchName + ".txt");
@@ -154,12 +169,19 @@ public class Main {
             is.close();
             out.close();
             br.close();
+            System.out.println(sb.toString());
             return sb.toString();
         } finally {
             br.close();
         }
     }
 
+    /**
+     *
+     * @param namelist      list of user's subscribers/followers
+     * @param twitchname    The user's Twitch username
+     * @throws IOException  because IOExceptions happen, y'know?
+     */
     private static void stringReplace(String namelist, String twitchname) throws IOException {
 
         File cwdFile = new File(twitchname + ".txt");
@@ -176,16 +198,16 @@ public class Main {
                 fw.close();
             }
         }
-
-
     }
 
-
-    public static String authToken(String token) {
-        String authtoken = token;
-                return token;
-    }
-
+    /**
+     *
+     * @param url       base URL constane
+     * @param channel   User's Twitch channel name
+     * @param limit     Max names per request, almost always 100
+     * @param offset    paging offset for usernames, +100 per request
+     * @return          Full URL with values inserted
+     */
     private static String insertURLValues(String url, String channel, int limit, int offset) {
         Twitch twitch = new Twitch();
 
@@ -193,14 +215,17 @@ public class Main {
         if (stlFrame.useFollows) {
             return url.replace("$values", channel + "/follows" /**+ "?oauth_token=" + token*/ + "?limit=" + Integer.toString(limit) + "&offset=" + Integer.toString(offset) + "&oauth_token=" + authToken);
         }
-        return url.replace("$values", channel + "/subscriptions" /***/ + "?limit=" + Integer.toString(limit) + "&offset=" + Integer.toString(offset)+ "&oauth_token=" + authToken);
+        return url.replace("$values", channel + "/subscriptions" /***/ + "?limit=" + Integer.toString(limit) + "&offset=" + Integer.toString(offset) + "&oauth_token=" + authToken);
     }
 
+    /**
+     *
+     * @param list    Subscriber/Follower ArrayList
+     * @return        List of usernames with all the unneeded data filtered
+     */
     private static ArrayList<String> parseList(ArrayList<String> list) {
         String pattern = "name\":\"+(\\w+)+\"";
-
         System.out.println("\nList is " + list.size() + " lines long");
-
         for (int i = 0; i < list.size(); i++) {
             Pattern r = Pattern.compile(pattern);
             Matcher m = r.matcher(list.get(i));
@@ -215,6 +240,11 @@ public class Main {
         return list;
     }
 
+    /**
+     *
+     * @param list  Subscriber/Follower ArrayList
+     * @return      String of usernames, formatted for the namelist
+     */
     private static String usernamesFormat(ArrayList<String> list) {
         String listString = "";
         for (String s : list) {
@@ -224,8 +254,16 @@ public class Main {
         return listString;
     }
 
-
-    //First reference should be url(username, 100, 0, 0, null)
+    /**
+     *
+     * @param twitchUsername    User's twitch username
+     * @param limit             Limit per request (Almost always 100)
+     * @param offset            Offset for pagination (+100 per request)
+     * @param subTotal          Total number of users/subscribers
+     * @param parsedOutput      Parsed username output from the previous request
+     * @param parsedInput       Not really sure why this is here. //TODO: Find out why this is still here.
+     * @return                  Full namelist
+     */
     public static String url(String twitchUsername, int limit, int offset, int subTotal, String parsedOutput, String parsedInput) {
         try {
             URL url = new URL(insertURLValues(TWITCH_SUBSCRIBERS, twitchUsername, limit, offset));
@@ -271,15 +309,19 @@ public class Main {
         return parsedInput;
     }
 
-
+    /**
+     *
+     * @param input     Gets data from json in url()
+     * @return          ArrayList of usernames
+     */
     @SuppressWarnings("deprecation")
     private static ArrayList<String> parseJSON(String input) {
         JsonObject jsonObject = Json.parse(input).asObject();
         JsonArray subs;
-        if ( stlFrame.useFollows) {
-             subs = Json.parse(input).asObject().get("follows").asArray();
+        if (stlFrame.useFollows) {
+            subs = Json.parse(input).asObject().get("follows").asArray();
         } else {
-             subs = Json.parse(input).asObject().get("subscriptions").asArray();
+            subs = Json.parse(input).asObject().get("subscriptions").asArray();
         }
         ArrayList<String> subList = new ArrayList<>();
         for (com.eclipsesource.json.JsonValue sub : subs) {
@@ -290,13 +332,6 @@ public class Main {
             listString += s + " ";
         }
         return subList;
-
-        //        Old Debug stuff
-//        System.out.println(followList.size());
-//        System.out.println((!jsonObject.get("_total").isNull()));
-//        System.out.println("Total: " + jsonObject.get("_total") + "\n_links: " + jsonObject.get("_links") + "\n_links.self: " + jsonObject.get("_links, self"));
-
     }
-
 }
 
