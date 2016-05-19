@@ -51,23 +51,23 @@ public class Main {
     }
 
     /**
-     * @param url   any URL needed to be opened in a browser window.
+     *
+     * @param twitchName    The user's Twitch username
      */
-     static void openURLInBrowser(String url) {
-        if (Desktop.isDesktopSupported()) {
-            Desktop desktop = Desktop.getDesktop();
-            try {
-                desktop.browse(new URI(url));
-            } catch (IOException | URISyntaxException e) {
-                e.printStackTrace();
+    static void processAll(String twitchName) {
+        try {
+            if (authMe()) {
+                String namelist = url(twitchName, 100, 0, 0, "");
+                System.out.println("Namelist: " + namelist);
+                stlFrame.updateLabel("Getting Twitch Subscribers...");
+                readFile(twitchName);
+                System.out.println("Namelist final text: " + namelist);
+                stringReplace(namelist, twitchName);
+                stlFrame.listCreated(twitchName);
             }
-        } else {
-            Runtime runtime = Runtime.getRuntime();
-            try {
-                runtime.exec("xdg-open " + url);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        } catch (IOException | NullPointerException e) {
+            e.printStackTrace();
+            System.out.println("Error in processAll");
         }
     }
 
@@ -97,33 +97,146 @@ public class Main {
         return false;
     }
 
-//    public static String authToken(String auth) {
-//        authToken = auth;
-//    }
-
-    //Request sent from the GUI. Handles all functionality, passing needed strings onto other methods.
-
+    /**
+     * @param url   any URL needed to be opened in a browser window.
+     */
+     static void openURLInBrowser(String url) {
+        if (Desktop.isDesktopSupported()) {
+            Desktop desktop = Desktop.getDesktop();
+            try {
+                desktop.browse(new URI(url));
+            } catch (IOException | URISyntaxException e) {
+                e.printStackTrace();
+            }
+        } else {
+            Runtime runtime = Runtime.getRuntime();
+            try {
+                runtime.exec("xdg-open " + url);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     /**
      *
-     * @param twitchName    The user's Twitch username
+     * @param twitchUsername    User's twitch username
+     * @param limit             Limit per request (Almost always 100)
+     * @param offset            Offset for pagination (+100 per request)
+     * @param subTotal          Total number of users/subscribers
+     * @param parsedOutput      Parsed username output from the previous request
+     * @return                  Full namelist
      */
-    static void processAll(String twitchName) {
+    private static String url(String twitchUsername, int limit, int offset, int subTotal, String parsedOutput) {
+        String parsedInput;
         try {
-            if (authMe()) {
-                String namelist = url(twitchName, 100, 0, 0, "");
-                System.out.println("Namelist: " + namelist);
-                stlFrame.updateLabel("Getting Twitch Subscribers...");
-                readFile(twitchName);
-                System.out.println("Namelist final text: " + namelist);
-                stringReplace(namelist, twitchName);
-                stlFrame.listCreated(twitchName);
+            URL url = new URL(insertURLValues(TWITCH_SUBSCRIBERS, twitchUsername, limit, offset));
+            System.out.println(url);
+            stlFrame.updateLabel("Generating URL, Requesting");
+
+            URLConnection connection = url.openConnection();
+            BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String inputLine = br.readLine();
+            br.close();
+            JsonObject jsonObject = Json.parse(inputLine).asObject();
+
+            int total = Integer.parseInt(jsonObject.get("_total").toString());
+            stlFrame.updateLabel("Total Subs" + total);
+
+            parsedInput = usernamesFormat(parseList(parseJSON(inputLine)));
+            System.out.println("post-parse: " + parsedInput);
+            parsedInput = parsedInput.concat(parsedOutput);
+            System.out.println("post-concat: " + parsedInput);
+
+            if (offset == 1600) {
+                stlFrame.maxNames();
             }
-        } catch (IOException | NullPointerException e) {
+            if (total > offset) {
+                url(twitchUsername, limit, offset + 100, total, parsedInput);
+            } else if (subTotal < offset) {
+                return parsedInput;
+            }
+
+        } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("Error in processAll");
+            stlFrame.popupWindow("Error -- Do you not have any subscribers?" /**+ "\n"+ s*/); // debug stacktrace popup removed.
+            return null;
         }
+        return parsedInput;
     }
+
+    /**
+     *
+     * @param url       base URL constane
+     * @param channel   User's Twitch channel name
+     * @param limit     Max names per request, almost always 100
+     * @param offset    paging offset for usernames, +100 per request
+     * @return          Full URL with values inserted
+     */
+    private static String insertURLValues(String url, String channel, int limit, int offset) {
+        // https://api.twitch.tv/kraken/channels/SolarShrieking/subscriptions?limit=100&offset=0&oauth_token=tc7111mgvyxbtk777ucmw726ztb23k&scope=channel_subscriptions
+        if (stlFrame.useFollows) {
+            return url.replace("$values", channel + "/follows" /**+ "?oauth_token=" + token*/ + "?limit=" + Integer.toString(limit) + "&offset=" + Integer.toString(offset) + "&oauth_token=" + authToken);
+        }
+        return url.replace("$values", channel + "/subscriptions" /***/ + "?limit=" + Integer.toString(limit) + "&offset=" + Integer.toString(offset) + "&oauth_token=" + authToken);
+    }
+
+    /**
+     *
+     * @param input     Gets data from json in url()
+     * @return          ArrayList of usernames
+     */
+    @SuppressWarnings("deprecation")
+    private static ArrayList<String> parseJSON(String input) {
+        JsonArray subs;
+        if (stlFrame.useFollows) {
+            subs = Json.parse(input).asObject().get("follows").asArray();
+        } else {
+            subs = Json.parse(input).asObject().get("subscriptions").asArray();
+        }
+        ArrayList<String> subList = new ArrayList<>();
+        for (com.eclipsesource.json.JsonValue sub : subs) {
+            subList.add(sub.toString() + "\n");
+        }
+        return subList;
+    }
+
+    /**
+     *
+     * @param list    Subscriber/Follower ArrayList
+     * @return        List of usernames with all the unneeded data filtered
+     */
+    private static ArrayList<String> parseList(ArrayList<String> list) {
+        String pattern = "name\":\"+(\\w+)+\"";
+        System.out.println("\nList is " + list.size() + " lines long");
+        for (int i = 0; i < list.size(); i++) {
+            Pattern r = Pattern.compile(pattern);
+            Matcher m = r.matcher(list.get(i));
+            if (m.find()) {
+                String username = m.group(0);
+                username = username.replace("name\":", "");
+                list.set(i, username);
+            } else {
+                System.out.println("No Match!");
+            }
+        }
+        return list;
+    }
+
+    /**
+     *
+     * @param list  Subscriber/Follower ArrayList
+     * @return      String of usernames, formatted for the namelist
+     */
+    private static String usernamesFormat(ArrayList<String> list) {
+        String listString = "";
+        for (String s : list) {
+            listString += s + " ";
+        }
+
+        return listString;
+    }
+
 
     /**
      *
@@ -185,125 +298,6 @@ public class Main {
                 fw.close();
             }
         }
-    }
-
-    /**
-     *
-     * @param url       base URL constane
-     * @param channel   User's Twitch channel name
-     * @param limit     Max names per request, almost always 100
-     * @param offset    paging offset for usernames, +100 per request
-     * @return          Full URL with values inserted
-     */
-    private static String insertURLValues(String url, String channel, int limit, int offset) {
-        // https://api.twitch.tv/kraken/channels/SolarShrieking/subscriptions?limit=100&offset=0&oauth_token=tc7111mgvyxbtk777ucmw726ztb23k&scope=channel_subscriptions
-        if (stlFrame.useFollows) {
-            return url.replace("$values", channel + "/follows" /**+ "?oauth_token=" + token*/ + "?limit=" + Integer.toString(limit) + "&offset=" + Integer.toString(offset) + "&oauth_token=" + authToken);
-        }
-        return url.replace("$values", channel + "/subscriptions" /***/ + "?limit=" + Integer.toString(limit) + "&offset=" + Integer.toString(offset) + "&oauth_token=" + authToken);
-    }
-
-    /**
-     *
-     * @param list    Subscriber/Follower ArrayList
-     * @return        List of usernames with all the unneeded data filtered
-     */
-    private static ArrayList<String> parseList(ArrayList<String> list) {
-        String pattern = "name\":\"+(\\w+)+\"";
-        System.out.println("\nList is " + list.size() + " lines long");
-        for (int i = 0; i < list.size(); i++) {
-            Pattern r = Pattern.compile(pattern);
-            Matcher m = r.matcher(list.get(i));
-            if (m.find()) {
-                String username = m.group(0);
-                username = username.replace("name\":", "");
-                list.set(i, username);
-            } else {
-                System.out.println("No Match!");
-            }
-        }
-        return list;
-    }
-
-    /**
-     *
-     * @param list  Subscriber/Follower ArrayList
-     * @return      String of usernames, formatted for the namelist
-     */
-    private static String usernamesFormat(ArrayList<String> list) {
-        String listString = "";
-        for (String s : list) {
-            listString += s + " ";
-        }
-
-        return listString;
-    }
-
-    /**
-     *
-     * @param twitchUsername    User's twitch username
-     * @param limit             Limit per request (Almost always 100)
-     * @param offset            Offset for pagination (+100 per request)
-     * @param subTotal          Total number of users/subscribers
-     * @param parsedOutput      Parsed username output from the previous request
-     * @return                  Full namelist
-     */
-    private static String url(String twitchUsername, int limit, int offset, int subTotal, String parsedOutput) {
-        String parsedInput;
-        try {
-            URL url = new URL(insertURLValues(TWITCH_SUBSCRIBERS, twitchUsername, limit, offset));
-            System.out.println(url);
-            stlFrame.updateLabel("Generating URL, Requesting");
-
-            URLConnection connection = url.openConnection();
-            BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String inputLine = br.readLine();
-            br.close();
-            JsonObject jsonObject = Json.parse(inputLine).asObject();
-
-            int total = Integer.parseInt(jsonObject.get("_total").toString());
-            stlFrame.updateLabel("Total Subs" + total);
-
-            parsedInput = usernamesFormat(parseList(parseJSON(inputLine)));
-            System.out.println("post-parse: " + parsedInput);
-            parsedInput = parsedInput.concat(parsedOutput);
-            System.out.println("post-concat: " + parsedInput);
-
-            if (offset == 1600) {
-                stlFrame.maxNames();
-            }
-            if (total > offset) {
-                url(twitchUsername, limit, offset + 100, total, parsedInput);
-            } else if (subTotal < offset) {
-                return parsedInput;
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            stlFrame.popupWindow("Error -- Do you not have any subscribers?" /**+ "\n"+ s*/); // debug stacktrace popup removed.
-            return null;
-        }
-        return parsedInput;
-    }
-
-    /**
-     *
-     * @param input     Gets data from json in url()
-     * @return          ArrayList of usernames
-     */
-    @SuppressWarnings("deprecation")
-    private static ArrayList<String> parseJSON(String input) {
-        JsonArray subs;
-        if (stlFrame.useFollows) {
-            subs = Json.parse(input).asObject().get("follows").asArray();
-        } else {
-            subs = Json.parse(input).asObject().get("subscriptions").asArray();
-        }
-        ArrayList<String> subList = new ArrayList<>();
-        for (com.eclipsesource.json.JsonValue sub : subs) {
-            subList.add(sub.toString() + "\n");
-        }
-        return subList;
     }
 }
 
