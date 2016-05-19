@@ -3,9 +3,7 @@
 Transcribe your Twitch Subscribers/Followers into a Stellaris namelist file for endless fun!
 
 #Download
-You can download the jarfile [here](https://www.dropbox.com/s/3pzisl58a2t1489/STL.jar?dl=1) 
-Please keep in mind this won't work if you don't have subscribers on your twitch acct, and
-even then, it might not work.
+You can download the jarfile [here](https://www.dropbox.com/s/3pzisl58a2t1489/STL.jar?dl=1).
 
 
 #Instructions
