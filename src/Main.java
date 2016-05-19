@@ -114,7 +114,7 @@ public class Main {
                 String namelist = url(twitchName, 100, 0, 0, "");
                 System.out.println("Namelist: " + namelist);
                 stlFrame.updateLabel("Getting Twitch Subscribers...");
-                readFile("twitchList.txt", twitchName);
+                readFile(twitchName);
                 System.out.println("Namelist final text: " + namelist);
                 stringReplace(namelist, twitchName);
                 stlFrame.listCreated(twitchName);
@@ -127,18 +127,16 @@ public class Main {
 
     /**
      *
-     * @param filename =    Name of twitchList.txt file, TODO: Make part of readFile() itself
      * @param twitchName =  The user's Twitch username
      * @return              Spits out the file.
      * @throws IOException
      */
     @SuppressWarnings("TryFinallyCanBeTryWithResources")
-    private static String readFile(String filename, String twitchName) throws IOException {
+    private static String readFile(String twitchName) throws IOException {
 
         File cwdFile = new File(twitchName + ".txt");
         String cwd = cwdFile.getAbsolutePath();
-        System.out.println(filename);
-        InputStream is = Main.class.getResourceAsStream(filename);
+        InputStream is = Main.class.getResourceAsStream("twitchList.txt");
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         PrintStream out = new PrintStream(cwd);
         try{
@@ -263,9 +261,6 @@ public class Main {
             br.close();
             JsonObject jsonObject = Json.parse(inputLine).asObject();
 
-            //TODO: catch error if user doesn't have Subscription features.
-//            String test = jsonObject.get("error").asObject().toString();
-//            System.out.println(test);
             int total = Integer.parseInt(jsonObject.get("_total").toString());
             stlFrame.updateLabel("Total Subs" + total);
 
@@ -285,11 +280,6 @@ public class Main {
 
         } catch (IOException e) {
             e.printStackTrace();
-//            Writer writer = new StringWriter();
-//            PrintWriter printWriter = new PrintWriter(writer);
-//            e.printStackTrace(printWriter);
-//            String s = writer.toString();
-//            stlFrame.updateLabel("Error!");
             stlFrame.popupWindow("Error -- Do you not have any subscribers?" /**+ "\n"+ s*/); // debug stacktrace popup removed.
             return null;
         }
