@@ -16,3 +16,8 @@ You can download the jarfile [here](https://www.dropbox.com/s/3pzisl58a2t1489/ST
 * Place the resulting file in **\yourSteamDir\Steam\steamapps\common\Stellaris\common\name_lists**
 * Stream!
 
+#Planned Features
+* Selectable namelist options -- only get subs/followers for specific entries
+* Automatic updating on Stellaris launch -- convert to mod?
+* Place file within Stellaris Directory automatically
+* etc
