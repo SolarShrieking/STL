@@ -27,10 +27,9 @@ class stlFrame extends JFrame {
     private BufferedImage iconGit = ImageIO.read(getClass().getResourceAsStream("resources/iconGit.png"));
 
     /**
-     *
      * @throws Exception In case Exceptions happen, y'know?
      */
-     stlFrame() throws Exception {
+    stlFrame() throws Exception {
         createGUI();
         setTitle("Stellaris Twitch Subscriber Namelist Creator");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -44,17 +43,17 @@ class stlFrame extends JFrame {
     }
 
     /**
-     *  Creates the UI
+     * Creates the UI
      */
     private void createGUI() {
 
         JPanel panel = new JPanel();
         getContentPane().add(panel);
-        panel.setLayout(new BorderLayout() );
+        panel.setLayout(new BorderLayout());
         panel.setBackground(Color.LIGHT_GRAY);
         logoImage = new JLabel();
-                try{
-                    logoImage.setIcon(new ImageIcon(imageLogo));
+        try {
+            logoImage.setIcon(new ImageIcon(imageLogo));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -66,17 +65,18 @@ class stlFrame extends JFrame {
 
         buttonAuth = new JButton("Authenticate");
         buttonAuth.addActionListener((e) -> {
-                        String username = fieldUsername.getText();
-                            if (validateInput(username)) {
-                                labelMessage.setText("Authenticating...");
-                                System.out.println(username);
-                                    if (useFollows) {
-                                        System.out.println("using followers instead");
-                                    }
-                                Main.processAll(username);
-                            } else {
-                                labelMessage.setText("Invalid input!");
-                            }});
+            String username = fieldUsername.getText();
+            if (validateInput(username)) {
+                labelMessage.setText("Authenticating...");
+                System.out.println(username);
+                if (useFollows) {
+                    System.out.println("using followers instead");
+                }
+                Main.processAll(username);
+            } else {
+                labelMessage.setText("Invalid input!");
+            }
+        });
 
         labelMessage = new JLabel("");
         labelMessage.setPreferredSize(new Dimension(200, 15));
@@ -88,10 +88,10 @@ class stlFrame extends JFrame {
             @Override
             public void mouseClicked(MouseEvent e) {
                 Main.openURLInBrowser("https://github.com/SolarShrieking/STL");
-                }
+            }
         });
 
-        try{
+        try {
             gitImage.setIcon(new ImageIcon(iconGit));
         } catch (Exception e) {
             e.printStackTrace();
@@ -104,19 +104,23 @@ class stlFrame extends JFrame {
             @Override
             public void mouseClicked(MouseEvent e) {
                 Main.openURLInBrowser("https://paypal.me/SolarShrieking/5");
-}});
+            }
+        });
 
-        try{
+        try {
             donateImage.setIcon(new ImageIcon(imageDonate));
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        donateImage.setLocation(panel.getWidth()-donateImage.getX(), panel.getHeight()-donateImage.getY());
+        donateImage.setLocation(panel.getWidth() - donateImage.getX(), panel.getHeight() - donateImage.getY());
         JLabel label = new JLabel("Twitch Username: ");
-        JPanel topPanel = new JPanel(); getContentPane().add(topPanel);
-        JPanel centerPanel = new JPanel(); getContentPane().add(centerPanel);
-        JPanel bottomPanel = new JPanel(); getContentPane().add(bottomPanel);
+        JPanel topPanel = new JPanel();
+        getContentPane().add(topPanel);
+        JPanel centerPanel = new JPanel();
+        getContentPane().add(centerPanel);
+        JPanel bottomPanel = new JPanel();
+        getContentPane().add(bottomPanel);
         topPanel.add(logoImage, BorderLayout.NORTH);
         centerPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
         centerPanel.add(label);
@@ -132,44 +136,40 @@ class stlFrame extends JFrame {
     }
 
     /**
-     *
-     * @param text   Text to put in the label
+     * @param text Text to put in the label
      */
     void updateLabel(String text) {
         labelMessage.setText(text);
     }
 
     /**
-     *
-     * @param username      Text entered in the username text field
-     * @return              True/False Valid username input
+     * @param username Text entered in the username text field
+     * @return True/False Valid username input
      */
     private boolean validateInput(String username) {
         //Uses regex to check if the username is valid.
         String pattern = "^[a-zA-Z0-9_]{4,25}$";
-            Pattern r = Pattern.compile(pattern);
-            Matcher m = r.matcher(username);
-            return m.matches();
+        Pattern r = Pattern.compile(pattern);
+        Matcher m = r.matcher(username);
+        return m.matches();
     }
 
     /**
-     *
-     * @param username      User's Twitch Name
+     * @param username User's Twitch Name
      */
     void listCreated(String username) {
         JOptionPane.showMessageDialog(null, "List Saved to " + username + ".txt");
     }
 
     /**
-     *  Popup message for people with 1600+ Subs/Followers due to API limits
+     * Popup message for people with 1600+ Subs/Followers due to API limits
      */
     void maxNames() {
         JOptionPane.showMessageDialog(null, "Sorry, TwitchAPI limits to 1600 requests.\nThe names will still be transcribed to your namelist.");
     }
 
     /**
-     *
-     * @param message       Message to display in a pop up message box
+     * @param message Message to display in a pop up message box
      */
     void popupWindow(String message) {
         JOptionPane.showMessageDialog(null, message);
