@@ -51,8 +51,7 @@ public class Main {
     }
 
     /**
-     *
-     * @param twitchName    The user's Twitch username
+     * @param twitchName The user's Twitch username
      */
     static void processAll(String twitchName) {
         try {
@@ -72,8 +71,7 @@ public class Main {
     }
 
     /**
-     *
-     * @return              True/False Authorized
+     * @return True/False Authorized
      */
     private static Boolean authMe() {
         Twitch twitch = new Twitch(); //getting twitch as Twitch from TwitchAPI Wrapper
@@ -98,9 +96,9 @@ public class Main {
     }
 
     /**
-     * @param url   any URL needed to be opened in a browser window.
+     * @param url any URL needed to be opened in a browser window.
      */
-     static void openURLInBrowser(String url) {
+    static void openURLInBrowser(String url) {
         if (Desktop.isDesktopSupported()) {
             Desktop desktop = Desktop.getDesktop();
             try {
@@ -119,13 +117,12 @@ public class Main {
     }
 
     /**
-     *
-     * @param twitchUsername    User's twitch username
-     * @param limit             Limit per request (Almost always 100)
-     * @param offset            Offset for pagination (+100 per request)
-     * @param subTotal          Total number of users/subscribers
-     * @param parsedOutput      Parsed username output from the previous request
-     * @return                  Full namelist
+     * @param twitchUsername User's twitch username
+     * @param limit          Limit per request (Almost always 100)
+     * @param offset         Offset for pagination (+100 per request)
+     * @param subTotal       Total number of users/subscribers
+     * @param parsedOutput   Parsed username output from the previous request
+     * @return Full namelist
      */
     private static String url(String twitchUsername, int limit, int offset, int subTotal, String parsedOutput) {
         String parsedInput;
@@ -166,12 +163,11 @@ public class Main {
     }
 
     /**
-     *
-     * @param url       base URL constane
-     * @param channel   User's Twitch channel name
-     * @param limit     Max names per request, almost always 100
-     * @param offset    paging offset for usernames, +100 per request
-     * @return          Full URL with values inserted
+     * @param url     base URL constant
+     * @param channel User's Twitch channel name
+     * @param limit   Max names per request, almost always 100
+     * @param offset  paging offset for usernames, +100 per request
+     * @return Full URL with values inserted
      */
     private static String insertURLValues(String url, String channel, int limit, int offset) {
         // https://api.twitch.tv/kraken/channels/SolarShrieking/subscriptions?limit=100&offset=0&oauth_token=tc7111mgvyxbtk777ucmw726ztb23k&scope=channel_subscriptions
@@ -182,9 +178,8 @@ public class Main {
     }
 
     /**
-     *
-     * @param input     Gets data from json in url()
-     * @return          ArrayList of usernames
+     * @param input Gets data from json in url()
+     * @return ArrayList of usernames
      */
     @SuppressWarnings("deprecation")
     private static ArrayList<String> parseJSON(String input) {
@@ -202,9 +197,8 @@ public class Main {
     }
 
     /**
-     *
-     * @param list    Subscriber/Follower ArrayList
-     * @return        List of usernames with all the unneeded data filtered
+     * @param list Subscriber/Follower ArrayList
+     * @return List of usernames with all the unneeded data filtered
      */
     private static ArrayList<String> parseList(ArrayList<String> list) {
         String pattern = "name\":\"+(\\w+)+\"";
@@ -224,24 +218,20 @@ public class Main {
     }
 
     /**
-     *
-     * @param list  Subscriber/Follower ArrayList
-     * @return      String of usernames, formatted for the namelist
+     * @param list Subscriber/Follower ArrayList
+     * @return String of usernames, formatted for the namelist
      */
     private static String usernamesFormat(ArrayList<String> list) {
         String listString = "";
         for (String s : list) {
             listString += s + " ";
         }
-
         return listString;
     }
 
-
     /**
-     *
      * @param twitchName =  The user's Twitch username
-     * @return              Spits out the file.
+     * @return Spits out the file.
      * @throws IOException
      */
     @SuppressWarnings("TryFinallyCanBeTryWithResources")
@@ -252,15 +242,15 @@ public class Main {
         InputStream is = Main.class.getResourceAsStream("twitchList.txt");
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         PrintStream out = new PrintStream(cwd);
-        try{
+        try {
             StringBuilder sb = new StringBuilder();
             String line = br.readLine();
 
             while (line != null) {
-                    sb.append(line);
-                    sb.append("\n");
-                    line = br.readLine();
-                    out.println(line);
+                sb.append(line);
+                sb.append("\n");
+                line = br.readLine();
+                out.println(line);
             }
             is.close();
             out.close();
@@ -277,10 +267,9 @@ public class Main {
     }
 
     /**
-     *
-     * @param namelist      list of user's subscribers/followers
-     * @param twitchname    The user's Twitch username
-     * @throws IOException  because IOExceptions happen, y'know?
+     * @param namelist   list of user's subscribers/followers
+     * @param twitchname The user's Twitch username
+     * @throws IOException because IOExceptions happen, y'know?
      */
     private static void stringReplace(String namelist, String twitchname) throws IOException {
 
