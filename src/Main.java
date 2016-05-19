@@ -303,11 +303,6 @@ public class Main {
         for (com.eclipsesource.json.JsonValue sub : subs) {
             subList.add(sub.toString() + "\n");
         }
-//
-//        for (String s : subList) {
-//            String listString = "";
-//            listString += s + " ";
-//        }
         return subList;
     }
 }
