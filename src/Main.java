@@ -43,11 +43,8 @@ public class Main {
 
     private static boolean debug = true;
     private static stlFrame stlFrame;
-    private static String TWITCH_SUBSCRIBERS = "https://api.twitch.tv/kraken/channels/$values"; // Base of the Subscribers Request URL https://api.twitch.tv/kraken/channels/channel_name/subscriptions
-    private static String TWITCH_FOLLOWERS = "https://api.twitch.tv/kraken/channels/$values"; // Base of the Subscribers Request URL https://api.twitch.tv/kraken/channels/channel_name/follows
+    private static String TWITCH_SUBSCRIBERS = "https://api.twitch.tv/kraken/channels/$values"; // Base of the Subscribers/Followers Request URL https://api.twitch.tv/kraken/channels/channel_name/subscriptions
     private static String authToken = null; // Authentication token of the user
-    private String twitchListLocation = null;
-
 
     public static void main(String args[]) throws Exception {
         stlFrame = new stlFrame(); //Register stlFrame.java to be used.
@@ -76,10 +73,9 @@ public class Main {
 
     /**
      *
-     * @param twitchName    The user's Twitch username
      * @return              True/False Authorized
      */
-    public static Boolean authMe(String twitchName) {
+    private static Boolean authMe() {
         Twitch twitch = new Twitch(); //getting twitch as Twitch from TwitchAPI Wrapper
         twitch.setClientId("5fu22trjshv34ervh1vp1xc28ob011f"); //StellarisTwitchList Client ID
         URI callbackUri = URI.create("http://127.0.0.1:23522/authorize.html"); //Authentication URL
@@ -98,8 +94,7 @@ public class Main {
             stlFrame.updateLabel("Authentication Error!");
             System.out.println(twitch.auth().getAuthenticationError());
         }
-        return null;
-
+        return false;
     }
 
 //    public static String authToken(String auth) {
@@ -115,11 +110,8 @@ public class Main {
      */
     static void processAll(String twitchName) {
         try {
-            boolean authorized = authMe(twitchName);
-            System.out.println("Authorization Status: " + authorized);
-
-            if (authorized) {
-                String namelist = url(twitchName, 100, 0, 0, "", null);
+            if (authMe()) {
+                String namelist = url(twitchName, 100, 0, 0, "");
                 System.out.println("Namelist: " + namelist);
                 stlFrame.updateLabel("Getting Twitch Subscribers...");
                 readFile("twitchList.txt", twitchName);
@@ -127,26 +119,21 @@ public class Main {
                 stringReplace(namelist, twitchName);
                 stlFrame.listCreated(twitchName);
             }
-
-//            if (namelist != null) {
-//                stlFrame.updateLabel("Namelist Request Success!");
-//                return namelist;
-
-        } catch (IOException e) {
+        } catch (IOException | NullPointerException e) {
             e.printStackTrace();
             System.out.println("Error in processAll");
         }
-
     }
 
     /**
      *
      * @param filename =    Name of twitchList.txt file, TODO: Make part of readFile() itself
      * @param twitchName =  The user's Twitch username
-     * @return
+     * @return              Spits out the file.
      * @throws IOException
      */
-    static String readFile(String filename, String twitchName) throws IOException {
+    @SuppressWarnings("TryFinallyCanBeTryWithResources")
+    private static String readFile(String filename, String twitchName) throws IOException {
 
         File cwdFile = new File(twitchName + ".txt");
         String cwd = cwdFile.getAbsolutePath();
@@ -154,17 +141,15 @@ public class Main {
         InputStream is = Main.class.getResourceAsStream(filename);
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         PrintStream out = new PrintStream(cwd);
-        try {
+        try{
             StringBuilder sb = new StringBuilder();
             String line = br.readLine();
 
             while (line != null) {
-                if (line != "null") {
                     sb.append(line);
                     sb.append("\n");
                     line = br.readLine();
                     out.println(line);
-                }
             }
             is.close();
             out.close();
@@ -172,7 +157,11 @@ public class Main {
             System.out.println(sb.toString());
             return sb.toString();
         } finally {
-            br.close();
+            try {
+                br.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -209,8 +198,6 @@ public class Main {
      * @return          Full URL with values inserted
      */
     private static String insertURLValues(String url, String channel, int limit, int offset) {
-        Twitch twitch = new Twitch();
-
         // https://api.twitch.tv/kraken/channels/SolarShrieking/subscriptions?limit=100&offset=0&oauth_token=tc7111mgvyxbtk777ucmw726ztb23k&scope=channel_subscriptions
         if (stlFrame.useFollows) {
             return url.replace("$values", channel + "/follows" /**+ "?oauth_token=" + token*/ + "?limit=" + Integer.toString(limit) + "&offset=" + Integer.toString(offset) + "&oauth_token=" + authToken);
@@ -261,10 +248,10 @@ public class Main {
      * @param offset            Offset for pagination (+100 per request)
      * @param subTotal          Total number of users/subscribers
      * @param parsedOutput      Parsed username output from the previous request
-     * @param parsedInput       Not really sure why this is here. //TODO: Find out why this is still here.
      * @return                  Full namelist
      */
-    public static String url(String twitchUsername, int limit, int offset, int subTotal, String parsedOutput, String parsedInput) {
+    private static String url(String twitchUsername, int limit, int offset, int subTotal, String parsedOutput) {
+        String parsedInput;
         try {
             URL url = new URL(insertURLValues(TWITCH_SUBSCRIBERS, twitchUsername, limit, offset));
             System.out.println(url);
@@ -291,7 +278,7 @@ public class Main {
                 stlFrame.maxNames();
             }
             if (total > offset) {
-                url(twitchUsername, limit, offset + 100, total, parsedInput, null);
+                url(twitchUsername, limit, offset + 100, total, parsedInput);
             } else if (subTotal < offset) {
                 return parsedInput;
             }
@@ -316,7 +303,6 @@ public class Main {
      */
     @SuppressWarnings("deprecation")
     private static ArrayList<String> parseJSON(String input) {
-        JsonObject jsonObject = Json.parse(input).asObject();
         JsonArray subs;
         if (stlFrame.useFollows) {
             subs = Json.parse(input).asObject().get("follows").asArray();
@@ -327,10 +313,11 @@ public class Main {
         for (com.eclipsesource.json.JsonValue sub : subs) {
             subList.add(sub.toString() + "\n");
         }
-        String listString = "";
-        for (String s : subList) {
-            listString += s + " ";
-        }
+//
+//        for (String s : subList) {
+//            String listString = "";
+//            listString += s + " ";
+//        }
         return subList;
     }
 }
