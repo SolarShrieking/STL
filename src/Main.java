@@ -16,29 +16,6 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Plan:
- * <p>
- * stlFrame   {
- * - User Types Name
- * - User Press Authenticate Button
- * - Button sends User to Auth Page
- * - User Authorizes, Then Presses brand new convert button. }
- * <p>
- * - Program grabs all subs and stores in a string, formatted properly
- * - Copies default twitchList, naming to username inputted
- * - Replaces placeholder in twitchList copy with namelist
- * - Eat Cake
- * <p>
- * <p>
- * get Authentication
- * piece together URL
- * Request
- * Get Return JSON, parse out needed info
- * Format
- * Place in List
- */
-
 public class Main {
 
     private static boolean debug = true;
