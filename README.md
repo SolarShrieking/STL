@@ -21,3 +21,4 @@ You can download the jarfile [here](https://www.dropbox.com/s/3pzisl58a2t1489/ST
 * Automatic updating on Stellaris launch -- convert to mod?
 * Place file within Stellaris Directory automatically
 * etc
+* I have plans to clean the entire project up soon with better implementation and coding style, as I wrote this when I was not that great with the language. It is still functional in its current state, but should not be considered quality. ;)
