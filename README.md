@@ -1,5 +1,8 @@
 # Stellaris <- Twitch -> List
 
+__To Whomever Finds This:__
+This was written before I had committed to writing any sort of decent human-readable code, and anyone using it or modifying it should be aware of this fact. If you choose to look within the contents of this project, consider yourself warned. What lies ahead is enough spaghetti code to make even the worst of devs die a little bit on the inside.
+
 Transcribe your Twitch Subscribers/Followers into a Stellaris namelist file for endless fun!
 
 #Download
